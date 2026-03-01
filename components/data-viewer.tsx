@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -47,7 +47,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
     })
   }
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
       const [evRes, atRes, regRes] = await Promise.all([
@@ -81,20 +81,25 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchData()
-  }, [refreshKey])
+  }, [refreshKey, fetchData])
 
-  // Also listen for global data change events (from CSV upload)
+  // Listen for global data change events (from CSV upload) with retry
   useEffect(() => {
     const handleDataChange = () => {
+      // Immediate fetch
       fetchData()
+      // Retry after delays to handle serverless instance warm-up
+      const t1 = setTimeout(() => fetchData(), 800)
+      const t2 = setTimeout(() => fetchData(), 2500)
+      return () => { clearTimeout(t1); clearTimeout(t2) }
     }
     window.addEventListener('dashboard-data-changed', handleDataChange)
     return () => window.removeEventListener('dashboard-data-changed', handleDataChange)
-  }, [])
+  }, [fetchData])
 
   // Auto-clear delete message after 3s
   useEffect(() => {

@@ -95,9 +95,12 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
         setSelectedFile(null)
         setValidation(null)
         if (fileInputRef.current) fileInputRef.current.value = ''
-        // Notify all components to refresh
+        // Notify all components to refresh immediately
         window.dispatchEvent(new Event('dashboard-data-changed'))
         onUploadComplete?.()
+        // Staggered retries to handle serverless cold starts / instance mismatch
+        setTimeout(() => window.dispatchEvent(new Event('dashboard-data-changed')), 1000)
+        setTimeout(() => window.dispatchEvent(new Event('dashboard-data-changed')), 3000)
         toast.success(`Upload successful! ${data.summary?.eventsAdded || 0} events added.`)
       } else {
         setResult({ 

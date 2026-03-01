@@ -56,8 +56,11 @@ export default function DashboardPage() {
   }
 
   const handleUploadComplete = () => {
+    // Increment key to force re-render of keyed components
     setRefreshKey(prev => prev + 1)
-    // Also dispatch global event to force all components to refresh
+    // Refresh stats immediately
+    fetchStats()
+    // Dispatch global event to force all components to refresh
     window.dispatchEvent(new Event('dashboard-data-changed'))
   }
 
