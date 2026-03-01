@@ -374,6 +374,21 @@ class DataStore {
       }
     }
 
+    // Cross-filter for consistency when any filter is active:
+    // Only include events that have matching registrations AND attendees that appear in registrations
+    const hasActiveFilter =
+      (filters.dateRange && filters.dateRange !== 'all') ||
+      (filters.eventType && filters.eventType !== 'all') ||
+      (filters.location && filters.location !== 'all') ||
+      (filters.cohort && filters.cohort !== 'all')
+
+    if (hasActiveFilter) {
+      const regEventIds = new Set(filteredRegistrations.map(r => r.eventId))
+      const regAttendeeIds = new Set(filteredRegistrations.map(r => r.attendeeId))
+      filteredEvents = filteredEvents.filter(e => regEventIds.has(e.id))
+      filteredAttendees = filteredAttendees.filter(a => regAttendeeIds.has(a.id))
+    }
+
     return { events: filteredEvents, attendees: filteredAttendees, registrations: filteredRegistrations }
   }
 
@@ -442,11 +457,13 @@ class DataStore {
     const totalAttendees = fAttendees.length
     const totalRegistrations = fRegs.length
     
+    // Calculate per-event attendance rates (exclude events with 0 registrations, but INCLUDE 0% rate events)
     const eventRates = fEvents.map(e => {
       const regs = fRegs.filter(r => r.eventId === e.id)
+      if (regs.length === 0) return null
       const attended = regs.filter(r => r.attended).length
-      return regs.length > 0 ? (attended / regs.length) * 100 : 0
-    }).filter(r => r > 0)
+      return (attended / regs.length) * 100
+    }).filter((r): r is number => r !== null)
 
     const avgRate = eventRates.length > 0
       ? eventRates.reduce((a, b) => a + b, 0) / eventRates.length
@@ -468,19 +485,27 @@ class DataStore {
     const secondAttendees = new Set(secondRegs.map(r => r.attendeeId)).size
 
     const firstAttendedRate = firstHalfEvents.length > 0
-      ? firstHalfEvents.map(e => {
-          const regs = firstRegs.filter(r => r.eventId === e.id)
-          const att = regs.filter(r => r.attended).length
-          return regs.length > 0 ? (att / regs.length) * 100 : 0
-        }).filter(r => r > 0).reduce((a, b, _, arr) => a + b / arr.length, 0)
+      ? (() => {
+          const rates = firstHalfEvents.map(e => {
+            const regs = firstRegs.filter(r => r.eventId === e.id)
+            if (regs.length === 0) return null
+            const att = regs.filter(r => r.attended).length
+            return (att / regs.length) * 100
+          }).filter((r): r is number => r !== null)
+          return rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0
+        })()
       : 0
 
     const secondAttendedRate = secondHalfEvents.length > 0
-      ? secondHalfEvents.map(e => {
-          const regs = secondRegs.filter(r => r.eventId === e.id)
-          const att = regs.filter(r => r.attended).length
-          return regs.length > 0 ? (att / regs.length) * 100 : 0
-        }).filter(r => r > 0).reduce((a, b, _, arr) => a + b / arr.length, 0)
+      ? (() => {
+          const rates = secondHalfEvents.map(e => {
+            const regs = secondRegs.filter(r => r.eventId === e.id)
+            if (regs.length === 0) return null
+            const att = regs.filter(r => r.attended).length
+            return (att / regs.length) * 100
+          }).filter((r): r is number => r !== null)
+          return rates.length > 0 ? rates.reduce((a, b) => a + b, 0) / rates.length : 0
+        })()
       : 0
 
     const calcTrend = (current: number, previous: number) => {
@@ -548,6 +573,7 @@ class DataStore {
           attendanceRate: regs.length > 0 ? parseFloat(((attended / regs.length) * 100).toFixed(2)) : 0
         }
       })
+      .filter(e => e.registered > 0)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, limit)
   }

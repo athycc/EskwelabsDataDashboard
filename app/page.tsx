@@ -62,8 +62,8 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 md:py-8">
+    <main className="min-h-screen bg-background overflow-x-hidden">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 md:py-8 overflow-hidden">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
           <DashboardHeader />
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">

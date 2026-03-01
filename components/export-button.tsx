@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { exportEventData, exportAttendanceData, exportNoShowData, downloadDashboardReport, createDashboardSummary } from '@/lib/export-utils'
 import { Download } from 'lucide-react'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 import { toast } from 'sonner'
 
 interface ExportButtonProps {
@@ -27,9 +27,7 @@ export function ExportButton({ stats, filters, disabled = false }: ExportButtonP
   const handleExportEvents = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/dashboard/events?limit=100&t=${Date.now()}${buildFilterQuery(filters)}`)
-      if (!response.ok) throw new Error('Failed to fetch events')
-      const events = await response.json()
+      const events = await dashboardPost('events', { limit: '100', ...filtersToBody(filters) })
       exportEventData(events)
       toast.success('Events report exported successfully')
     } catch (error) {
@@ -43,9 +41,7 @@ export function ExportButton({ stats, filters, disabled = false }: ExportButtonP
   const handleExportTrends = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/dashboard/attendance-trends?t=${Date.now()}${buildFilterQuery(filters)}`)
-      if (!response.ok) throw new Error('Failed to fetch trends')
-      const trends = await response.json()
+      const trends = await dashboardPost('attendance-trends', filtersToBody(filters))
       exportAttendanceData(trends)
       toast.success('Attendance trends exported successfully')
     } catch (error) {
@@ -59,9 +55,7 @@ export function ExportButton({ stats, filters, disabled = false }: ExportButtonP
   const handleExportNoShows = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch(`/api/dashboard/no-shows?limit=100&t=${Date.now()}${buildFilterQuery(filters)}`)
-      if (!response.ok) throw new Error('Failed to fetch no-shows')
-      const noShows = await response.json()
+      const noShows = await dashboardPost('no-shows', { limit: '100', ...filtersToBody(filters) })
       exportNoShowData(noShows)
       toast.success('No-show analysis exported successfully')
     } catch (error) {
