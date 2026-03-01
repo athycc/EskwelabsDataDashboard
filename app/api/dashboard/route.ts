@@ -303,6 +303,36 @@ function handleData(body: Record<string, unknown>) {
       })
     })
   }
+  // Return ALL data in a single response — guarantees consistency since it comes from one instance
+  if (view === 'full') {
+    return Response.json({
+      type: 'full',
+      events: events.map(e => ({
+        id: e.id, name: e.name, type: e.eventType, date: e.startDate.split('T')[0],
+        location: e.location, capacity: e.capacity,
+        registered: registrations.filter(r => r.eventId === e.id).length,
+        attended: registrations.filter(r => r.eventId === e.id && r.attended).length,
+      })),
+      attendees: attendees.map(a => {
+        const cohort = cohorts.find(c => c.id === a.cohortId)
+        const regs = registrations.filter(r => r.attendeeId === a.id)
+        return {
+          id: a.id, name: a.fullName, email: a.email,
+          cohort: cohort?.name || `Cohort ${a.cohortId}`, location: a.location, status: a.status,
+          eventsRegistered: regs.length, eventsAttended: regs.filter(r => r.attended).length,
+        }
+      }),
+      registrations: registrations.map(r => {
+        const event = events.find(e => e.id === r.eventId)
+        const attendee = attendees.find(a => a.id === r.attendeeId)
+        return {
+          id: r.id, event: event?.name || 'Unknown', attendee: attendee?.fullName || 'Unknown',
+          email: attendee?.email || '', attended: r.attended, registeredAt: r.registeredAt.split('T')[0],
+        }
+      }),
+      counts: { events: events.length, attendees: attendees.length, registrations: registrations.length },
+    })
+  }
   return Response.json({
     type: 'all',
     counts: { events: events.length, attendees: attendees.length, registrations: registrations.length, cohorts: cohorts.length },
@@ -424,8 +454,10 @@ function handleUpload(body: Record<string, unknown>) {
     return Response.json({ valid: true, totalRows: rows.length, eventsInCSV: csvEventNames.size, duplicateEvents, newEvents, detectedHeaders: rawHeaders, allDuplicate: duplicateEvents.length > 0 && newEvents.length === 0 })
   }
 
-  // Deep duplicate check
-  if (duplicateEvents.length > 0 && newEvents.length === 0) {
+  // Deep duplicate check (skip during rehydration — let the idempotent mutation
+  // logic below handle it; the 409 early-return would prevent data from being added)
+  const forRehydration = body._forRehydration === true
+  if (!forRehydration && duplicateEvents.length > 0 && newEvents.length === 0) {
     let potentialNewAttendees = 0; let potentialNewRegistrations = 0
     for (const row of rows) {
       const eventName = (row.event_name || '').trim()
@@ -530,7 +562,8 @@ function rehydrateUploads(storedUploads: Array<{ id: string; csv: string }>) {
     if (dataStore.hasAppliedUpload(upload.id)) continue
     // Re-apply the upload; handleUpload mutates dataStore as a side effect
     // and its duplicate-detection logic prevents re-adding existing data.
-    handleUpload({ csvText: upload.csv, validateOnly: false })
+    // _forRehydration skips the 409 early-return so mutation code always runs.
+    handleUpload({ csvText: upload.csv, validateOnly: false, _forRehydration: true })
     dataStore.markUploadApplied(upload.id)
   }
 }

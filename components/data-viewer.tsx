@@ -51,22 +51,15 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
-      const [evData, atData, regData] = await Promise.all([
-        dashboardPost('data', { view: 'events' }),
-        dashboardPost('data', { view: 'attendees' }),
-        dashboardPost('data', { view: 'registrations' }),
-      ])
+      // Single API call returns ALL data from ONE instance — guarantees consistent counts
+      const data = await dashboardPost('data', { view: 'full' })
 
-      setEvents(evData.data || [])
-      setAttendees(atData.data || [])
-      setRegistrations(regData.data || [])
+      setEvents(data.events || [])
+      setAttendees(data.attendees || [])
+      setRegistrations(data.registrations || [])
 
-      // Show actual counts of what's displayed in each tab
-      setCounts({
-        events: (evData.data || []).length,
-        attendees: (atData.data || []).length,
-        registrations: (regData.data || []).length,
-      })
+      // Counts come from the same response, so they always match
+      setCounts(data.counts || { events: 0, attendees: 0, registrations: 0 })
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
