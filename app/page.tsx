@@ -83,17 +83,17 @@ export default function DashboardPage() {
           <EventsComparisonChart key={`events-${refreshKey}`} filters={filters} />
         </div>
 
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 mb-6 sm:mb-8">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 mb-6 sm:mb-8">
           <DemographicsSection key={`demo-${refreshKey}`} filters={filters} />
           <NoShowsAnalysis key={`noshows-${refreshKey}`} filters={filters} />
         </div>
 
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 mb-6 sm:mb-8">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 mb-6 sm:mb-8">
           <AIInsights key={`insights-${refreshKey}`} />
           <EskwelabsInfo />
         </div>
 
-        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 mb-6 sm:mb-8">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 mb-6 sm:mb-8">
           <CSVUpload onUploadComplete={handleUploadComplete} />
           <AIChat />
         </div>

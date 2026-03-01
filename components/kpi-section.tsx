@@ -49,7 +49,7 @@ export function KPISection({ filters }: KPISectionProps) {
   }, [filters])
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 mb-6 sm:mb-8">
       <KPICard
         title="Total Events"
         value={stats?.totalEvents || 0}

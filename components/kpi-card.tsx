@@ -25,16 +25,16 @@ export function KPICard({
 }: KPICardProps) {
   return (
     <Card className="bg-background border-border hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1 sm:pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">{title}</CardTitle>
         {icon && <div className="h-4 w-4 text-muted-foreground">{icon}</div>}
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
         {isLoading ? (
           <Skeleton className="h-8 w-24" />
         ) : (
           <div className="flex items-baseline gap-2">
-            <div className="text-2xl sm:text-3xl font-bold text-foreground">{value}</div>
+            <div className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">{value}</div>
             {unit && <div className="text-sm text-muted-foreground">{unit}</div>}
           </div>
         )}
