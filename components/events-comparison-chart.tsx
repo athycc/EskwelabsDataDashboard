@@ -77,12 +77,12 @@ export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Events Comparison</CardTitle>
-        <CardDescription>Attendance by event (top 10)</CardDescription>
+        <CardTitle className="text-sm sm:text-base">Events Comparison</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Attendance by event (top 10)</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+          <div className="flex flex-col items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground">
             <BarChart3 className="h-12 w-12 mb-3 opacity-40" />
             <p className="text-sm font-medium">No events match your filters</p>
             <p className="text-xs mt-1">Try adjusting your filters to see event comparisons</p>

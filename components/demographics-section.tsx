@@ -119,8 +119,8 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Attendee Demographics</CardTitle>
-        <CardDescription>Distribution by status and cohort</CardDescription>
+        <CardTitle className="text-sm sm:text-base">Attendee Demographics</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Distribution by status and cohort</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="status" className="w-full">

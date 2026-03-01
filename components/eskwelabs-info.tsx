@@ -34,11 +34,11 @@ export function EskwelabsInfo() {
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <GraduationCap className="h-5 w-5" />
+            <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+              <GraduationCap className="h-4 w-4 sm:h-5 sm:w-5" />
               ESKWELABS Programs
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-xs sm:text-sm">
               Philippine-based data science education platform
             </CardDescription>
           </div>

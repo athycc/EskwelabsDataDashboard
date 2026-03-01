@@ -81,12 +81,12 @@ export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>No-Show Patterns</CardTitle>
-        <CardDescription>Events with highest no-show rates</CardDescription>
+        <CardTitle className="text-sm sm:text-base">No-Show Patterns</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Events with highest no-show rates</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-          <Table className="min-w-[500px]">
+        <div className="overflow-x-auto max-h-[350px] sm:max-h-[400px] overflow-y-auto">
+          <Table className="min-w-[400px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Event</TableHead>
@@ -106,8 +106,8 @@ export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
               ) : (
                 data.map((row, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-medium text-sm">
-                      {row.eventName.substring(0, 20)}
+                    <TableCell className="font-medium text-xs sm:text-sm">
+                      {row.eventName.substring(0, 18)}
                     </TableCell>
                     <TableCell>
                       <Badge className={getTypeColor(row.eventType)}>

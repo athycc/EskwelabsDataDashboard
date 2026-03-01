@@ -79,13 +79,13 @@ export function AIChat() {
   ]
 
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageCircle className="h-5 w-5" />
+        <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+          <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" />
           AI Dashboard Chat
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-xs sm:text-sm">
           Ask questions about your event attendance data — powered by free, open-source analysis
         </CardDescription>
       </CardHeader>

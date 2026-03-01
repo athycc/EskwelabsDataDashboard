@@ -139,14 +139,14 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
   }
 
   return (
-    <Card className="lg:col-span-2">
+    <Card>
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <CardTitle className="flex items-center gap-2">
-            <Database className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-sm sm:text-base">
+            <Database className="h-4 w-4 sm:h-5 sm:w-5" />
             Data Viewer
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Browse, verify, and manage all events, attendees, and registrations in the system
           </CardDescription>
         </div>

@@ -45,7 +45,7 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
     <Card className="p-3 sm:p-4 mb-4 sm:mb-6 bg-background border-border">
       <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">Date Range</label>
+          <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2 block">Date Range</label>
           <Select value={filters.dateRange} onValueChange={(val) => handleFilterChange('dateRange', val)}>
             <SelectTrigger>
               <SelectValue />
@@ -60,7 +60,7 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">Event Type</label>
+          <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2 block">Event Type</label>
           <Select value={filters.eventType} onValueChange={(val) => handleFilterChange('eventType', val)}>
             <SelectTrigger>
               <SelectValue />
@@ -77,7 +77,7 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">Cohort</label>
+          <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2 block">Cohort</label>
           <Select value={filters.cohort} onValueChange={(val) => handleFilterChange('cohort', val)}>
             <SelectTrigger>
               <SelectValue />
@@ -94,7 +94,7 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
         </div>
 
         <div>
-          <label className="text-sm font-medium text-muted-foreground mb-2 block">Location</label>
+          <label className="text-xs sm:text-sm font-medium text-muted-foreground mb-1 sm:mb-2 block">Location</label>
           <Select value={filters.location} onValueChange={(val) => handleFilterChange('location', val)}>
             <SelectTrigger>
               <SelectValue />
@@ -113,8 +113,8 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
         </div>
       </div>
 
-      <div className="flex gap-2 mt-4">
-        <Button variant="outline" size="sm" onClick={handleReset}>
+      <div className="flex gap-2 mt-3 sm:mt-4">
+        <Button variant="outline" size="sm" onClick={handleReset} className="text-xs sm:text-sm">
           Reset Filters
         </Button>
       </div>

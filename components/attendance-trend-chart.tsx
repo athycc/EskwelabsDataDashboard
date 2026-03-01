@@ -65,12 +65,12 @@ export function AttendanceTrendChart({ filters }: AttendanceTrendChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Attendance Trends Over Time</CardTitle>
-        <CardDescription>Daily attendance rate and registration patterns</CardDescription>
+        <CardTitle className="text-sm sm:text-base">Attendance Trends Over Time</CardTitle>
+        <CardDescription className="text-xs sm:text-sm">Daily attendance rate and registration patterns</CardDescription>
       </CardHeader>
       <CardContent>
         {data.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
+          <div className="flex flex-col items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground">
             <TrendingDown className="h-12 w-12 mb-3 opacity-40" />
             <p className="text-sm font-medium">No trend data available</p>
             <p className="text-xs mt-1">Try adjusting your filters to see attendance trends</p>
