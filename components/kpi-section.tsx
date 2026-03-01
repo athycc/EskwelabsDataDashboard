@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { KPICard } from '@/components/kpi-card'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 
 interface DashboardStats {
   totalEvents: number
@@ -27,9 +27,7 @@ export function KPISection({ filters }: KPISectionProps) {
 
   const fetchStats = async () => {
     try {
-      const response = await fetch(`/api/dashboard/stats?t=${Date.now()}${buildFilterQuery(filters)}`, { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch stats')
-      const data = await response.json()
+      const data = await dashboardPost('stats', filtersToBody(filters))
       setStats(data)
     } catch (error) {
       console.error('Error fetching dashboard stats:', error)

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 
 interface NoShowData {
   eventName: string
@@ -26,10 +26,8 @@ export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
 
   const fetchNoShows = async () => {
     try {
-      const response = await fetch(`/api/dashboard/no-shows?limit=50&t=${Date.now()}${buildFilterQuery(filters)}`, { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch no-shows')
-      const noShowsData = await response.json()
-      setData(noShowsData)
+      const response = await dashboardPost('no-shows', { limit: '50', ...filtersToBody(filters) })
+      setData(response)
     } catch (error) {
       console.error('Error fetching no-shows:', error)
     } finally {

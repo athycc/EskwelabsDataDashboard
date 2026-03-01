@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Skeleton } from '@/components/ui/skeleton'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 import { TrendingDown } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -27,9 +27,7 @@ export function AttendanceTrendChart({ filters }: AttendanceTrendChartProps) {
 
   const fetchTrends = async () => {
     try {
-      const response = await fetch(`/api/dashboard/attendance-trends?t=${Date.now()}${buildFilterQuery(filters)}`, { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch trends')
-      const trendData = await response.json()
+      const trendData = await dashboardPost('attendance-trends', filtersToBody(filters))
       setData(trendData)
     } catch (error) {
       console.error('Error fetching attendance trends:', error)

@@ -32,3 +32,29 @@ export function buildFilterQuery(filters?: FilterState | null): string {
   const qs = params.toString()
   return qs ? `&${qs}` : ''
 }
+
+/** Convert FilterState to a plain object for POST body */
+export function filtersToBody(filters?: FilterState | null): Record<string, string> {
+  if (!filters) return {}
+  const body: Record<string, string> = {}
+  if (filters.dateRange) body.dateRange = filters.dateRange
+  if (filters.eventType) body.eventType = filters.eventType
+  if (filters.cohort) body.cohort = filters.cohort
+  if (filters.location) body.location = filters.location
+  return body
+}
+
+/** POST to the consolidated /api/dashboard endpoint */
+export async function dashboardPost(action: string, body: Record<string, unknown> = {}) {
+  const response = await fetch('/api/dashboard', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, ...body }),
+    cache: 'no-store',
+  })
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ error: 'Request failed' }))
+    throw new Error(err.error || `API error: ${response.status}`)
+  }
+  return response.json()
+}

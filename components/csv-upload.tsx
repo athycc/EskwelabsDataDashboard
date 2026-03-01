@@ -50,7 +50,8 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
     try {
       const formData = new FormData()
       formData.append('file', file)
-      const response = await fetch('/api/dashboard/upload?validate=true', {
+      formData.append('validateOnly', 'true')
+      const response = await fetch('/api/dashboard', {
         method: 'POST',
         body: formData
       })
@@ -83,7 +84,7 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      const response = await fetch('/api/dashboard/upload', {
+      const response = await fetch('/api/dashboard', {
         method: 'POST',
         body: formData
       })

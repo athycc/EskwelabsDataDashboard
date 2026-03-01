@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { MessageCircle, Send, Bot, User } from 'lucide-react'
+import { dashboardPost } from '@/lib/utils'
 
 interface ChatMessage {
   role: 'user' | 'assistant'
@@ -42,15 +43,7 @@ export function AIChat() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/dashboard/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage })
-      })
-
-      if (!response.ok) throw new Error('Failed to get response')
-
-      const data = await response.json()
+      const data = await dashboardPost('chat', { message: userMessage })
       setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
     } catch (error) {
       console.error('Chat error:', error)
@@ -104,12 +97,7 @@ export function AIChat() {
                   setInput('')
                   setMessages(prev => [...prev, { role: 'user', content: q }])
                   setIsLoading(true)
-                  fetch('/api/dashboard/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: q })
-                  })
-                    .then(res => res.json())
+                  dashboardPost('chat', { message: q })
                     .then(data => {
                       setMessages(prev => [...prev, { role: 'assistant', content: data.response }])
                     })

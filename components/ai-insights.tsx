@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Sparkles } from 'lucide-react'
+import { dashboardPost } from '@/lib/utils'
 
 export function AIInsights() {
   const [insights, setInsights] = useState<string>('')
@@ -15,13 +16,7 @@ export function AIInsights() {
     setIsLoading(true)
     setError('')
     try {
-      const response = await fetch('/api/dashboard/ai-insights', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: 'overview' })
-      })
-      if (!response.ok) throw new Error('Failed to fetch insights')
-      const data = await response.json()
+      const data = await dashboardPost('ai-insights')
       setInsights(data.insights || '')
     } catch (err) {
       console.error('Error fetching AI insights:', err)

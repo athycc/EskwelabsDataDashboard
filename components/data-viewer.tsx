@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { Database, RefreshCw, CalendarDays, Users, ClipboardList, Trash2, AlertTriangle, Search, X, MapPin, Clock, UserCheck, UserX, ChevronDown } from 'lucide-react'
+import { dashboardPost } from '@/lib/utils'
 
 interface EventRow {
   id: number; name: string; type: string; date: string; location: string; capacity: number; registered: number; attended: number
@@ -50,14 +51,11 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
   const fetchData = useCallback(async () => {
     setIsLoading(true)
     try {
-      const [evRes, atRes, regRes] = await Promise.all([
-        fetch(`/api/dashboard/data?view=events&t=${Date.now()}`, { cache: 'no-store' }),
-        fetch(`/api/dashboard/data?view=attendees&t=${Date.now()}`, { cache: 'no-store' }),
-        fetch(`/api/dashboard/data?view=registrations&t=${Date.now()}`, { cache: 'no-store' }),
+      const [evData, atData, regData] = await Promise.all([
+        dashboardPost('data', { view: 'events' }),
+        dashboardPost('data', { view: 'attendees' }),
+        dashboardPost('data', { view: 'registrations' }),
       ])
-      const evData = await evRes.json()
-      const atData = await atRes.json()
-      const regData = await regRes.json()
 
       setEvents(evData.data || [])
       setAttendees(atData.data || [])
@@ -106,13 +104,8 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
     if (!deleteConfirm) return
     setIsDeleting(true)
     try {
-      const response = await fetch('/api/dashboard/data', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type: deleteConfirm.type, id: deleteConfirm.id }),
-      })
-      const data = await response.json()
-      if (response.ok) {
+      const data = await dashboardPost('delete', { type: deleteConfirm.type, id: deleteConfirm.id })
+      if (data.message) {
         setDeleteMessage({ text: data.message, success: true })
         fetchData()
         onDataChange?.()

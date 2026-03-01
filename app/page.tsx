@@ -14,7 +14,7 @@ import { AIChat } from '@/components/ai-chat'
 import { CSVUpload } from '@/components/csv-upload'
 import { EskwelabsInfo } from '@/components/eskwelabs-info'
 import { DataViewer } from '@/components/data-viewer'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { buildFilterQuery, filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 import { ThemeToggle } from '@/components/theme-toggle'
 
 interface DashboardStats {
@@ -37,10 +37,7 @@ export default function DashboardPage() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const filterQs = buildFilterQuery(filters)
-      const response = await fetch(`/api/dashboard/stats?t=${Date.now()}${filterQs}`, { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch stats')
-      const data = await response.json()
+      const data = await dashboardPost('stats', filtersToBody(filters))
       setStats(data)
     } catch (error) {
       console.error('Error fetching stats:', error)

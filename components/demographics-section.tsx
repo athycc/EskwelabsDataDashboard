@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from 'recharts'
 import { Skeleton } from '@/components/ui/skeleton'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 import { Users } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -35,16 +35,11 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
 
   const fetchDemographics = async () => {
     try {
-      const filterQs = buildFilterQuery(filters)
-      const [cohortRes, statusRes] = await Promise.all([
-        fetch(`/api/dashboard/demographics?type=cohort&t=${Date.now()}${filterQs}`, { cache: 'no-store' }),
-        fetch(`/api/dashboard/demographics?type=status&t=${Date.now()}${filterQs}`, { cache: 'no-store' })
+      const fb = filtersToBody(filters)
+      const [cohorts, statuses] = await Promise.all([
+        dashboardPost('demographics', { type: 'cohort', ...fb }),
+        dashboardPost('demographics', { type: 'status', ...fb })
       ])
-
-      if (!cohortRes.ok || !statusRes.ok) throw new Error('Failed to fetch demographics')
-
-      const cohorts = await cohortRes.json()
-      const statuses = await statusRes.json()
 
       setCohortData(cohorts)
       setStatusData(statuses)

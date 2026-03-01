@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { Skeleton } from '@/components/ui/skeleton'
-import { buildFilterQuery, type FilterState } from '@/lib/utils'
+import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
 import { BarChart3 } from 'lucide-react'
 import { useIsMobile } from '@/hooks/use-mobile'
 
@@ -30,9 +30,7 @@ export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
 
   const fetchEvents = async () => {
     try {
-      const response = await fetch(`/api/dashboard/events?limit=10&t=${Date.now()}${buildFilterQuery(filters)}`, { cache: 'no-store' })
-      if (!response.ok) throw new Error('Failed to fetch events')
-      const eventsData = await response.json()
+      const eventsData = await dashboardPost('events', { limit: '10', ...filtersToBody(filters) })
       setData(eventsData)
     } catch (error) {
       console.error('Error fetching events:', error)
