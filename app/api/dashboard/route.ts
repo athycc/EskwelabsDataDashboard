@@ -507,6 +507,26 @@ function handleUpload(body: Record<string, unknown>) {
   })
 }
 
+// ============ REHYDRATION (cold-start recovery) ============
+
+/**
+ * On Vercel serverless, each function instance has its own in-memory DataStore.
+ * When a cold instance starts, it only has the seed data. The client stores
+ * previously-uploaded CSV text in localStorage and sends it with every request.
+ * This function re-applies those uploads so the instance has the full dataset.
+ */
+function rehydrateUploads(storedUploads: Array<{ id: string; csv: string }>) {
+  if (!Array.isArray(storedUploads)) return
+  for (const upload of storedUploads) {
+    if (!upload.id || !upload.csv) continue
+    if (dataStore.hasAppliedUpload(upload.id)) continue
+    // Re-apply the upload; handleUpload mutates dataStore as a side effect
+    // and its duplicate-detection logic prevents re-adding existing data.
+    handleUpload({ csvText: upload.csv, validateOnly: false })
+    dataStore.markUploadApplied(upload.id)
+  }
+}
+
 // ============ MAIN HANDLER ============
 
 export async function POST(request: Request) {
@@ -516,6 +536,13 @@ export async function POST(request: Request) {
     // Handle FormData uploads (CSV file upload)
     if (contentType.includes('multipart/form-data')) {
       const formData = await request.formData()
+
+      // Rehydrate stored uploads from client so cold instances have full data
+      const storedUploadsField = formData.get('storedUploads') as string
+      if (storedUploadsField) {
+        try { rehydrateUploads(JSON.parse(storedUploadsField)) } catch {}
+      }
+
       const file = formData.get('file') as File
       const validateOnly = formData.get('validateOnly') === 'true'
       if (!file) return Response.json({ error: 'No file provided' }, { status: 400 })
@@ -526,6 +553,12 @@ export async function POST(request: Request) {
 
     // Handle JSON requests
     const body = await request.json()
+
+    // Rehydrate stored uploads from client so cold instances have full data
+    if (body._storedUploads) {
+      rehydrateUploads(body._storedUploads as Array<{ id: string; csv: string }>)
+    }
+
     const action = body.action as string
 
     switch (action) {

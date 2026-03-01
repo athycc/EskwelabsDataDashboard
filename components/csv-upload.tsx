@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Upload, FileText, CheckCircle, AlertCircle, X, FileUp, Download, ShieldAlert, FileCheck } from 'lucide-react'
 import { toast } from 'sonner'
+import { getStoredUploads, saveUpload } from '@/lib/utils'
 
 interface UploadResult {
   success: boolean
@@ -51,6 +52,9 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
       const formData = new FormData()
       formData.append('file', file)
       formData.append('validateOnly', 'true')
+      // Include stored uploads so cold Vercel instances have full data for accurate validation
+      const stored = getStoredUploads()
+      if (stored.length > 0) formData.append('storedUploads', JSON.stringify(stored))
       const response = await fetch('/api/dashboard', {
         method: 'POST',
         body: formData
@@ -81,8 +85,14 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
     setResult(null)
 
     try {
+      // Read CSV text on the client BEFORE sending, so we can persist it to localStorage
+      const csvText = await selectedFile.text()
+
       const formData = new FormData()
       formData.append('file', selectedFile)
+      // Include stored uploads so cold Vercel instances have full data
+      const stored = getStoredUploads()
+      if (stored.length > 0) formData.append('storedUploads', JSON.stringify(stored))
 
       const response = await fetch('/api/dashboard', {
         method: 'POST',
@@ -93,6 +103,8 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
 
       if (response.ok) {
         setResult(data)
+        // Persist the uploaded CSV to localStorage so future requests can rehydrate cold instances
+        saveUpload(csvText)
         setSelectedFile(null)
         setValidation(null)
         if (fileInputRef.current) fileInputRef.current.value = ''

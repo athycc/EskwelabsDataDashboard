@@ -308,6 +308,7 @@ class DataStore {
   private events: Event[]
   private attendees: Attendee[]
   private registrations: EventRegistration[]
+  private appliedUploadIds = new Set<string>()
 
   constructor() {
     this.cohorts = [...cohorts]
@@ -315,6 +316,11 @@ class DataStore {
     this.attendees = [...attendees]
     this.registrations = [...registrations]
   }
+
+  /** Check if a client-stored upload batch was already applied to this instance */
+  hasAppliedUpload(id: string): boolean { return this.appliedUploadIds.has(id) }
+  /** Mark a client-stored upload batch as applied */
+  markUploadApplied(id: string): void { this.appliedUploadIds.add(id) }
 
   // --- Filtering helper ---
   private getFilteredData(filters?: FilterParams) {
@@ -372,21 +378,6 @@ class DataStore {
         const attendeeIds = new Set(filteredAttendees.map(a => a.id))
         filteredRegistrations = filteredRegistrations.filter(r => attendeeIds.has(r.attendeeId))
       }
-    }
-
-    // Cross-filter for consistency when any filter is active:
-    // Only include events that have matching registrations AND attendees that appear in registrations
-    const hasActiveFilter =
-      (filters.dateRange && filters.dateRange !== 'all') ||
-      (filters.eventType && filters.eventType !== 'all') ||
-      (filters.location && filters.location !== 'all') ||
-      (filters.cohort && filters.cohort !== 'all')
-
-    if (hasActiveFilter) {
-      const regEventIds = new Set(filteredRegistrations.map(r => r.eventId))
-      const regAttendeeIds = new Set(filteredRegistrations.map(r => r.attendeeId))
-      filteredEvents = filteredEvents.filter(e => regEventIds.has(e.id))
-      filteredAttendees = filteredAttendees.filter(a => regAttendeeIds.has(a.id))
     }
 
     return { events: filteredEvents, attendees: filteredAttendees, registrations: filteredRegistrations }

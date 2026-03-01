@@ -44,12 +44,45 @@ export function filtersToBody(filters?: FilterState | null): Record<string, stri
   return body
 }
 
-/** POST to the consolidated /api/dashboard endpoint */
+// ── Client-side upload persistence (survives Vercel serverless cold starts) ──
+
+interface StoredUpload { id: string; csv: string }
+
+/** Retrieve previously uploaded CSVs from localStorage */
+export function getStoredUploads(): StoredUpload[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem('eskwelabs_csv_uploads')
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+/** Save an uploaded CSV to localStorage so future requests can rehydrate cold instances */
+export function saveUpload(csv: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const uploads = getStoredUploads()
+    const id = `upload_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+    uploads.push({ id, csv })
+    localStorage.setItem('eskwelabs_csv_uploads', JSON.stringify(uploads))
+  } catch { /* localStorage full or unavailable */ }
+}
+
+/** Clear all stored uploads (e.g. after a dashboard reset) */
+export function clearStoredUploads(): void {
+  if (typeof window === 'undefined') return
+  try { localStorage.removeItem('eskwelabs_csv_uploads') } catch {}
+}
+
+/** POST to the consolidated /api/dashboard endpoint.
+ *  Automatically includes any client-stored uploads so cold Vercel instances
+ *  can rebuild the full DataStore before responding. */
 export async function dashboardPost(action: string, body: Record<string, unknown> = {}) {
+  const storedUploads = getStoredUploads()
   const response = await fetch('/api/dashboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...body }),
+    body: JSON.stringify({ action, ...body, ...(storedUploads.length > 0 ? { _storedUploads: storedUploads } : {}) }),
     cache: 'no-store',
   })
   if (!response.ok) {

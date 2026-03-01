@@ -78,7 +78,7 @@ export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
         <CardTitle className="text-sm sm:text-base">Events Comparison</CardTitle>
         <CardDescription className="text-xs sm:text-sm">Attendance by event (top 10)</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="min-w-0 px-2 sm:px-6">
         {data.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[250px] sm:h-[300px] text-muted-foreground">
             <BarChart3 className="h-12 w-12 mb-3 opacity-40" />
@@ -86,31 +86,35 @@ export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
             <p className="text-xs mt-1">Try adjusting your filters to see event comparisons</p>
           </div>
         ) : (
-        <ResponsiveContainer width="100%" height={isMobile ? 250 : 300}>
-          <BarChart data={chartData} margin={{ top: 5, right: isMobile ? 10 : 30, left: 0, bottom: 50 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
-            <XAxis
-              dataKey="name"
-              stroke="var(--color-muted-foreground)"
-              style={{ fontSize: isMobile ? '9px' : '11px' }}
-              angle={-45}
-              textAnchor="end"
-              height={80}
-            />
-            <YAxis stroke="var(--color-muted-foreground)" style={{ fontSize: '12px' }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--color-background)',
-                border: '1px solid var(--color-border)',
-                borderRadius: '8px'
-              }}
-              cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
-            />
-            <Legend />
-            <Bar dataKey="attended" fill="#10b981" name="Attended" />
-            <Bar dataKey="registered" fill="#3b82f6" name="Registered" />
-          </BarChart>
-        </ResponsiveContainer>
+        <div className="overflow-x-auto -mx-2 sm:-mx-0">
+          <div className={isMobile ? 'min-w-[480px]' : ''}>
+            <ResponsiveContainer width="100%" height={isMobile ? 280 : 300}>
+              <BarChart data={chartData} margin={{ top: 5, right: isMobile ? 10 : 30, left: 0, bottom: 50 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
+                <XAxis
+                  dataKey="name"
+                  stroke="var(--color-muted-foreground)"
+                  style={{ fontSize: isMobile ? '9px' : '11px' }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis stroke="var(--color-muted-foreground)" style={{ fontSize: '12px' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--color-background)',
+                    border: '1px solid var(--color-border)',
+                    borderRadius: '8px'
+                  }}
+                  cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
+                />
+                <Legend />
+                <Bar dataKey="attended" fill="#10b981" name="Attended" />
+                <Bar dataKey="registered" fill="#3b82f6" name="Registered" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
         )}
       </CardContent>
     </Card>
