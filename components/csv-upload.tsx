@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Upload, FileText, CheckCircle, AlertCircle, X, FileUp, Download, ShieldAlert, FileCheck } from 'lucide-react'
 import { toast } from 'sonner'
-import { getStoredUploads, saveUpload } from '@/lib/utils'
+import { getStoredUploads, saveUpload, getStoredDeletions } from '@/lib/utils'
 
 interface UploadResult {
   success: boolean
@@ -55,6 +55,8 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
       // Include stored uploads so cold Vercel instances have full data for accurate validation
       const stored = getStoredUploads()
       if (stored.length > 0) formData.append('storedUploads', JSON.stringify(stored))
+      const deletions = getStoredDeletions()
+      if (deletions.length > 0) formData.append('storedDeletions', JSON.stringify(deletions))
       const response = await fetch('/api/dashboard', {
         method: 'POST',
         body: formData
@@ -93,6 +95,8 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
       // Include stored uploads so cold Vercel instances have full data
       const stored = getStoredUploads()
       if (stored.length > 0) formData.append('storedUploads', JSON.stringify(stored))
+      const deletions = getStoredDeletions()
+      if (deletions.length > 0) formData.append('storedDeletions', JSON.stringify(deletions))
 
       const response = await fetch('/api/dashboard', {
         method: 'POST',

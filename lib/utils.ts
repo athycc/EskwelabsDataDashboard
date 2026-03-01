@@ -74,15 +74,52 @@ export function clearStoredUploads(): void {
   try { localStorage.removeItem('eskwelabs_csv_uploads') } catch {}
 }
 
+// ── Client-side deletion persistence (survives Vercel serverless cold starts) ──
+
+interface StoredDeletion { type: string; identifier: string }
+
+/** Retrieve previously recorded deletions from localStorage */
+export function getStoredDeletions(): StoredDeletion[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = localStorage.getItem('eskwelabs_deletions')
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+/** Save a deletion so future requests can replay it on cold instances.
+ *  identifier = event name | attendee email | "eventName|attendeeEmail" for registrations */
+export function saveDeletion(type: string, identifier: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    const deletions = getStoredDeletions()
+    // Avoid duplicates
+    if (deletions.some(d => d.type === type && d.identifier === identifier)) return
+    deletions.push({ type, identifier })
+    localStorage.setItem('eskwelabs_deletions', JSON.stringify(deletions))
+  } catch {}
+}
+
+/** Clear all stored deletions */
+export function clearStoredDeletions(): void {
+  if (typeof window === 'undefined') return
+  try { localStorage.removeItem('eskwelabs_deletions') } catch {}
+}
+
 /** POST to the consolidated /api/dashboard endpoint.
  *  Automatically includes any client-stored uploads so cold Vercel instances
  *  can rebuild the full DataStore before responding. */
 export async function dashboardPost(action: string, body: Record<string, unknown> = {}) {
   const storedUploads = getStoredUploads()
+  const storedDeletions = getStoredDeletions()
   const response = await fetch('/api/dashboard', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...body, ...(storedUploads.length > 0 ? { _storedUploads: storedUploads } : {}) }),
+    body: JSON.stringify({
+      action, ...body,
+      ...(storedUploads.length > 0 ? { _storedUploads: storedUploads } : {}),
+      ...(storedDeletions.length > 0 ? { _storedDeletions: storedDeletions } : {}),
+    }),
     cache: 'no-store',
   })
   if (!response.ok) {

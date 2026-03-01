@@ -315,11 +315,12 @@ function handleDelete(body: Record<string, unknown>) {
   const { type, id } = body as { type: string; id: number }
   if (!type || !id) return Response.json({ error: 'Missing type or id' }, { status: 400 })
 
-  let success = false; let message = ''
+  let success = false; let message = ''; let identifier = ''
   switch (type) {
     case 'event': {
       const event = dataStore.getEventById(id)
       if (!event) return Response.json({ error: 'Event not found' }, { status: 404 })
+      identifier = event.name
       const regCount = dataStore.getRegistrationsByEvent(id).length
       success = dataStore.deleteEvent(id)
       message = `Deleted event "${event.name}" and ${regCount} associated registration(s).`
@@ -328,12 +329,19 @@ function handleDelete(body: Record<string, unknown>) {
     case 'attendee': {
       const attendee = dataStore.getAttendeeById(id)
       if (!attendee) return Response.json({ error: 'Attendee not found' }, { status: 404 })
+      identifier = attendee.email
       const regCount = dataStore.getRegistrationsByAttendee(id).length
       success = dataStore.deleteAttendee(id)
       message = `Deleted attendee "${attendee.fullName}" and ${regCount} associated registration(s).`
       break
     }
     case 'registration': {
+      const reg = dataStore.getRegistrations().find(r => r.id === id)
+      if (reg) {
+        const event = dataStore.getEventById(reg.eventId)
+        const attendee = dataStore.getAttendeeById(reg.attendeeId)
+        identifier = `${event?.name || ''}|${attendee?.email || ''}`
+      }
       success = dataStore.deleteRegistration(id)
       message = success ? `Deleted registration #${id}.` : 'Registration not found.'
       break
@@ -342,7 +350,7 @@ function handleDelete(body: Record<string, unknown>) {
       return Response.json({ error: 'Invalid type' }, { status: 400 })
   }
   if (!success) return Response.json({ error: 'Item not found' }, { status: 404 })
-  return Response.json({ success: true, message })
+  return Response.json({ success: true, message, identifier })
 }
 
 function handleDemographics(body: Record<string, unknown>) {
@@ -527,6 +535,43 @@ function rehydrateUploads(storedUploads: Array<{ id: string; csv: string }>) {
   }
 }
 
+// ============ DELETION REHYDRATION ============
+
+/**
+ * Re-apply client-stored deletions so every Vercel instance reflects
+ * items the user has removed (from seed data or uploaded CSVs).
+ * Must run AFTER upload rehydration.
+ */
+function rehydrateDeletions(storedDeletions: Array<{ type: string; identifier: string }>) {
+  if (!Array.isArray(storedDeletions)) return
+  for (const del of storedDeletions) {
+    if (!del.type || !del.identifier) continue
+    switch (del.type) {
+      case 'event': {
+        const event = dataStore.getEvents().find(e => e.name.trim().toLowerCase() === del.identifier.trim().toLowerCase())
+        if (event) dataStore.deleteEvent(event.id)
+        break
+      }
+      case 'attendee': {
+        const attendee = dataStore.getAttendees().find(a => a.email.trim().toLowerCase() === del.identifier.trim().toLowerCase())
+        if (attendee) dataStore.deleteAttendee(attendee.id)
+        break
+      }
+      case 'registration': {
+        const [eventName, email] = del.identifier.split('|')
+        if (!eventName || !email) break
+        const event = dataStore.getEvents().find(e => e.name.trim().toLowerCase() === eventName.trim().toLowerCase())
+        const attendee = dataStore.getAttendees().find(a => a.email.trim().toLowerCase() === email.trim().toLowerCase())
+        if (event && attendee) {
+          const reg = dataStore.getRegistrationsByEvent(event.id).find(r => r.attendeeId === attendee.id)
+          if (reg) dataStore.deleteRegistration(reg.id)
+        }
+        break
+      }
+    }
+  }
+}
+
 // ============ MAIN HANDLER ============
 
 export async function POST(request: Request) {
@@ -543,6 +588,12 @@ export async function POST(request: Request) {
         try { rehydrateUploads(JSON.parse(storedUploadsField)) } catch {}
       }
 
+      // Rehydrate stored deletions
+      const storedDeletionsField = formData.get('storedDeletions') as string
+      if (storedDeletionsField) {
+        try { rehydrateDeletions(JSON.parse(storedDeletionsField)) } catch {}
+      }
+
       const file = formData.get('file') as File
       const validateOnly = formData.get('validateOnly') === 'true'
       if (!file) return Response.json({ error: 'No file provided' }, { status: 400 })
@@ -557,6 +608,11 @@ export async function POST(request: Request) {
     // Rehydrate stored uploads from client so cold instances have full data
     if (body._storedUploads) {
       rehydrateUploads(body._storedUploads as Array<{ id: string; csv: string }>)
+    }
+
+    // Rehydrate stored deletions (AFTER uploads, so deletions take precedence)
+    if (body._storedDeletions) {
+      rehydrateDeletions(body._storedDeletions as Array<{ type: string; identifier: string }>)
     }
 
     const action = body.action as string

@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { Database, RefreshCw, CalendarDays, Users, ClipboardList, Trash2, AlertTriangle, Search, X, MapPin, Clock, UserCheck, UserX, ChevronDown } from 'lucide-react'
-import { dashboardPost } from '@/lib/utils'
+import { dashboardPost, saveDeletion } from '@/lib/utils'
 
 interface EventRow {
   id: number; name: string; type: string; date: string; location: string; capacity: number; registered: number; attended: number
@@ -107,6 +107,10 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
       const data = await dashboardPost('delete', { type: deleteConfirm.type, id: deleteConfirm.id })
       if (data.message) {
         setDeleteMessage({ text: data.message, success: true })
+        // Persist deletion to localStorage so it survives cold starts
+        if (data.identifier) {
+          saveDeletion(deleteConfirm.type, data.identifier)
+        }
         fetchData()
         onDataChange?.()
       } else {
