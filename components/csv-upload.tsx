@@ -323,7 +323,7 @@ export function CSVUpload({ onUploadComplete }: { onUploadComplete?: () => void 
                 {result.success && result.summary && (
                   <div className="mt-3 space-y-2">
                     {/* New items added */}
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <div className="text-center p-2 rounded bg-white/50 dark:bg-black/20">
                         <p className="text-lg font-bold">{result.summary.eventsAdded}</p>
                         <p className="text-xs">Events Added</p>

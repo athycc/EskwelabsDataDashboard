@@ -6,6 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { Skeleton } from '@/components/ui/skeleton'
 import { buildFilterQuery, type FilterState } from '@/lib/utils'
 import { BarChart3 } from 'lucide-react'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface EventData {
   name: string
@@ -25,6 +26,7 @@ interface EventsComparisonChartProps {
 export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
   const [data, setData] = useState<EventData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const isMobile = useIsMobile()
 
   const fetchEvents = async () => {
     try {
@@ -64,8 +66,9 @@ export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
   }
 
   // Prepare data for chart - take event names and attendance
+  const truncLen = isMobile ? 10 : 15
   const chartData = data.map(event => ({
-    name: event.name.substring(0, 15) + (event.name.length > 15 ? '...' : ''),
+    name: event.name.substring(0, truncLen) + (event.name.length > truncLen ? '...' : ''),
     attended: event.attended,
     registered: event.registered,
     fullName: event.name
@@ -85,13 +88,13 @@ export function EventsComparisonChart({ filters }: EventsComparisonChartProps) {
             <p className="text-xs mt-1">Try adjusting your filters to see event comparisons</p>
           </div>
         ) : (
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData} margin={{ top: 5, right: 30, left: 0, bottom: 50 }}>
+        <ResponsiveContainer width="100%" height={isMobile ? 250 : 300}>
+          <BarChart data={chartData} margin={{ top: 5, right: isMobile ? 10 : 30, left: 0, bottom: 50 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
             <XAxis
               dataKey="name"
               stroke="var(--color-muted-foreground)"
-              style={{ fontSize: '11px' }}
+              style={{ fontSize: isMobile ? '9px' : '11px' }}
               angle={-45}
               textAnchor="end"
               height={80}

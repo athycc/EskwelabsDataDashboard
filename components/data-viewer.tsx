@@ -142,7 +142,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
 
   return (
     <Card className="lg:col-span-2">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <CardTitle className="flex items-center gap-2">
             <Database className="h-5 w-5" />
@@ -152,7 +152,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
             Browse, verify, and manage all events, attendees, and registrations in the system
           </CardDescription>
         </div>
-        <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading}>
+        <Button variant="outline" size="sm" onClick={fetchData} disabled={isLoading} className="w-full sm:w-auto">
           <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
           Refresh
         </Button>
@@ -262,7 +262,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
             <div className="mt-3 p-4 rounded-lg border bg-muted/30">
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <h3 className="text-base font-semibold">{selectedEvent.name}</h3>
+                  <h3 className="text-sm sm:text-base font-semibold">{selectedEvent.name}</h3>
                   <div className="flex flex-wrap gap-2 mt-1">
                     <Badge className={getTypeColor(selectedEvent.type)}>{selectedEvent.type}</Badge>
                   </div>
@@ -272,21 +272,21 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                 </Button>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-                <div className="flex items-center gap-2 text-sm">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span>{selectedEvent.date}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                  <MapPin className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                   <span>{selectedEvent.location}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                  <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-muted-foreground" />
                   <span>Capacity: {selectedEvent.capacity}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <UserCheck className="h-4 w-4 text-green-500" />
+                <div className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm">
+                  <UserCheck className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-green-500" />
                   <span>Rate: {selectedEvent.registered > 0 ? ((selectedEvent.attended / selectedEvent.registered) * 100).toFixed(1) : 0}%</span>
                 </div>
               </div>
@@ -317,7 +317,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                   <div>
                     <p className="text-sm font-medium mb-2">Registrations ({eventRegs.length})</p>
                     <div className="overflow-x-auto max-h-[200px] overflow-y-auto rounded-lg border">
-                      <Table>
+                      <Table className="min-w-[400px]">
                         <TableHeader>
                           <TableRow>
                             <TableHead>Attendee</TableHead>
@@ -369,9 +369,9 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
 
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-3 mb-4">
-            <TabsTrigger value="events">Events ({counts.events})</TabsTrigger>
-            <TabsTrigger value="attendees">Attendees ({counts.attendees})</TabsTrigger>
-            <TabsTrigger value="registrations">Registrations ({counts.registrations})</TabsTrigger>
+            <TabsTrigger value="events" className="text-xs sm:text-sm">Events ({counts.events})</TabsTrigger>
+            <TabsTrigger value="attendees" className="text-xs sm:text-sm">Attendees ({counts.attendees})</TabsTrigger>
+            <TabsTrigger value="registrations" className="text-xs sm:text-sm">Regs ({counts.registrations})</TabsTrigger>
           </TabsList>
 
           {isLoading ? (
@@ -384,7 +384,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
             <>
               <TabsContent value="events">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                  <Table>
+                  <Table className="min-w-[650px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-8">#</TableHead>
@@ -444,7 +444,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
 
               <TabsContent value="attendees">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                  <Table>
+                  <Table className="min-w-[700px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-8">#</TableHead>
@@ -498,7 +498,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
 
               <TabsContent value="registrations">
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-                  <Table>
+                  <Table className="min-w-[550px]">
                     <TableHeader>
                       <TableRow>
                         <TableHead className="w-8">#</TableHead>

@@ -86,7 +86,7 @@ export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
-          <Table>
+          <Table className="min-w-[500px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Event</TableHead>

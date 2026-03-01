@@ -63,10 +63,10 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <div className="w-full max-w-7xl mx-auto px-4 py-6 md:py-8">
-        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6 md:mb-8">
+      <div className="w-full max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6 md:py-8">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
           <DashboardHeader />
-          <div className="flex flex-wrap gap-2 w-full md:w-auto">
+          <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <ThemeToggle />
             <ExportButton stats={stats} filters={filters} disabled={!stats} />
           </div>
@@ -75,27 +75,27 @@ export default function DashboardPage() {
         <FilterControls onFilterChange={handleFilterChange} />
         <KPISection key={`kpi-${refreshKey}`} filters={filters} />
         
-        <div className="grid gap-6 mb-8">
+        <div className="grid gap-4 sm:gap-6 mb-6 sm:mb-8">
           <AttendanceTrendChart key={`trends-${refreshKey}`} filters={filters} />
           <EventsComparisonChart key={`events-${refreshKey}`} filters={filters} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2 mb-8">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 mb-6 sm:mb-8">
           <DemographicsSection key={`demo-${refreshKey}`} filters={filters} />
           <NoShowsAnalysis key={`noshows-${refreshKey}`} filters={filters} />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2 mb-8">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 mb-6 sm:mb-8">
           <AIInsights key={`insights-${refreshKey}`} />
           <EskwelabsInfo />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2 mb-8">
+        <div className="grid gap-4 sm:gap-6 lg:grid-cols-2 mb-6 sm:mb-8">
           <CSVUpload onUploadComplete={handleUploadComplete} />
           <AIChat />
         </div>
 
-        <div className="grid gap-6 mb-8">
+        <div className="grid gap-4 sm:gap-6 mb-6 sm:mb-8">
           <DataViewer refreshKey={refreshKey} onDataChange={handleUploadComplete} />
         </div>
       </div>

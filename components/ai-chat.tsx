@@ -127,7 +127,7 @@ export function AIChat() {
         </div>
 
         {/* Chat Messages */}
-        <div ref={chatContainerRef} className="h-80 overflow-y-auto border rounded-lg p-4 mb-4 space-y-4 bg-muted/20">
+        <div ref={chatContainerRef} className="h-64 sm:h-80 overflow-y-auto border rounded-lg p-3 sm:p-4 mb-4 space-y-4 bg-muted/20">
           {messages.map((msg, i) => (
             <div
               key={i}
@@ -139,7 +139,7 @@ export function AIChat() {
                 </div>
               )}
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-2 text-sm whitespace-pre-wrap ${
+                className={`max-w-[85%] sm:max-w-[80%] rounded-lg px-3 sm:px-4 py-2 text-sm whitespace-pre-wrap ${
                   msg.role === 'user'
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-card border'

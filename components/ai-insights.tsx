@@ -38,7 +38,7 @@ export function AIInsights() {
 
   return (
     <Card className="lg:col-span-2">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <CardTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5" />
@@ -53,6 +53,7 @@ export function AIInsights() {
           variant="outline"
           onClick={fetchInsights}
           disabled={isLoading}
+          className="w-full sm:w-auto"
         >
           {isLoading ? 'Analyzing...' : 'Refresh'}
         </Button>

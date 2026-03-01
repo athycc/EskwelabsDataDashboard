@@ -6,6 +6,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsi
 import { Skeleton } from '@/components/ui/skeleton'
 import { buildFilterQuery, type FilterState } from '@/lib/utils'
 import { TrendingDown } from 'lucide-react'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface TrendData {
   date: string
@@ -22,6 +23,7 @@ interface AttendanceTrendChartProps {
 export function AttendanceTrendChart({ filters }: AttendanceTrendChartProps) {
   const [data, setData] = useState<TrendData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const isMobile = useIsMobile()
 
   const fetchTrends = async () => {
     try {
@@ -74,15 +76,16 @@ export function AttendanceTrendChart({ filters }: AttendanceTrendChartProps) {
             <p className="text-xs mt-1">Try adjusting your filters to see attendance trends</p>
           </div>
         ) : (
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data} margin={{ top: 5, right: 30, left: 0, bottom: 5 }}>
+        <ResponsiveContainer width="100%" height={isMobile ? 250 : 300}>
+          <LineChart data={data} margin={{ top: 5, right: isMobile ? 10 : 30, left: isMobile ? -10 : 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" />
             <XAxis
               dataKey="date"
               stroke="var(--color-muted-foreground)"
-              style={{ fontSize: '12px' }}
+              style={{ fontSize: isMobile ? '10px' : '12px' }}
+              tick={{ fontSize: isMobile ? 10 : 12 }}
             />
-            <YAxis stroke="var(--color-muted-foreground)" style={{ fontSize: '12px' }} />
+            <YAxis stroke="var(--color-muted-foreground)" style={{ fontSize: isMobile ? '10px' : '12px' }} width={isMobile ? 30 : 60} />
             <Tooltip
               contentStyle={{
                 backgroundColor: 'var(--color-background)',

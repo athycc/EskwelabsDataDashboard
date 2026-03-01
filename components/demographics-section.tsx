@@ -7,6 +7,7 @@ import { PieChart, Pie, Cell, Legend, ResponsiveContainer, Tooltip } from 'recha
 import { Skeleton } from '@/components/ui/skeleton'
 import { buildFilterQuery, type FilterState } from '@/lib/utils'
 import { Users } from 'lucide-react'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface DemographicData {
   name?: string
@@ -30,6 +31,7 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
   const [cohortData, setCohortData] = useState<DemographicData[]>([])
   const [statusData, setStatusData] = useState<DemographicData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const isMobile = useIsMobile()
 
   const fetchDemographics = async () => {
     try {
@@ -141,9 +143,9 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                   data={statusChartData}
                   cx="50%"
                   cy="50%"
-                  labelLine={true}
-                  label={renderCustomLabel}
-                  outerRadius={80}
+                  labelLine={!isMobile}
+                  label={isMobile ? false : renderCustomLabel}
+                  outerRadius={isMobile ? 70 : 80}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -172,9 +174,9 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                   data={cohortChartData}
                   cx="50%"
                   cy="50%"
-                  labelLine={true}
-                  label={renderCustomLabel}
-                  outerRadius={80}
+                  labelLine={!isMobile}
+                  label={isMobile ? false : renderCustomLabel}
+                  outerRadius={isMobile ? 70 : 80}
                   fill="#8884d8"
                   dataKey="value"
                 >

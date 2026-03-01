@@ -32,7 +32,7 @@ export function EskwelabsInfo() {
   return (
     <Card>
       <CardHeader>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5" />

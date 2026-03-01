@@ -34,7 +34,7 @@ export function KPICard({
           <Skeleton className="h-8 w-24" />
         ) : (
           <div className="flex items-baseline gap-2">
-            <div className="text-3xl font-bold text-foreground">{value}</div>
+            <div className="text-2xl sm:text-3xl font-bold text-foreground">{value}</div>
             {unit && <div className="text-sm text-muted-foreground">{unit}</div>}
           </div>
         )}

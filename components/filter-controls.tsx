@@ -42,7 +42,7 @@ export function FilterControls({ onFilterChange }: FilterControlsProps) {
   }
 
   return (
-    <Card className="p-4 mb-6 bg-background border-border">
+    <Card className="p-3 sm:p-4 mb-4 sm:mb-6 bg-background border-border">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="text-sm font-medium text-muted-foreground mb-2 block">Date Range</label>
