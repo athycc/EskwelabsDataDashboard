@@ -63,18 +63,11 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
       setAttendees(atData.data || [])
       setRegistrations(regData.data || [])
 
-      // Compute counts consistently with KPI stats:
-      // - Events: total events in system
-      // - Attendees: only those with at least 1 registration (matches KPI "Total Attendees")
-      // - Registrations: total registration records
-      const allAttendees = atData.data || []
-      const attendeesWithRegs = allAttendees.filter((a: AttendeeRow) => a.eventsRegistered > 0).length
-      const totalRegs = (evData.data || []).reduce((sum: number, e: EventRow) => sum + e.registered, 0)
-
+      // Show actual counts of what's displayed in each tab
       setCounts({
-        events: evData.count || 0,
-        attendees: attendeesWithRegs,
-        registrations: totalRegs,
+        events: (evData.data || []).length,
+        attendees: (atData.data || []).length,
+        registrations: (regData.data || []).length,
       })
     } catch (error) {
       console.error('Error loading data:', error)
