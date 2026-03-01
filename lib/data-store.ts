@@ -374,11 +374,6 @@ class DataStore {
       }
     }
 
-    // Narrow attendees to only those who have registrations in the filtered event set.
-    // This ensures demographics totals match the KPI "Total Attendees" count.
-    const registeredAttendeeIds = new Set(filteredRegistrations.map(r => r.attendeeId))
-    filteredAttendees = filteredAttendees.filter(a => registeredAttendeeIds.has(a.id))
-
     return { events: filteredEvents, attendees: filteredAttendees, registrations: filteredRegistrations }
   }
 
@@ -442,11 +437,9 @@ class DataStore {
 
   // --- Computed Stats ---
   getStats(filters?: FilterParams) {
-    const { events: fEvents, registrations: fRegs } = this.getFilteredData(filters)
+    const { events: fEvents, attendees: fAttendees, registrations: fRegs } = this.getFilteredData(filters)
     const totalEvents = fEvents.length
-    // Count unique attendees who have registrations in the filtered results
-    const uniqueAttendeeIds = new Set(fRegs.map(r => r.attendeeId))
-    const totalAttendees = uniqueAttendeeIds.size
+    const totalAttendees = fAttendees.length
     const totalRegistrations = fRegs.length
     
     const eventRates = fEvents.map(e => {
