@@ -1,0 +1,9 @@
+event_name,event_type,event_date,location,capacity,attendee_name,attendee_email,cohort,attended
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Elena Reyes,elena.reyes@gmail.com,Cohort 1,true
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Marco Villanueva,marco.v@gmail.com,Cohort 2,true
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Sophia Tan,sophia.tan@gmail.com,Cohort 3,false
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Gabriel Cruz,gab.cruz@gmail.com,Cohort 1,true
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Isabella Santos,isa.santos@gmail.com,Cohort 4,true
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Rafael Mendoza,rafa.mendoza@gmail.com,Cohort 2,false
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Camille De Leon,camille.dl@gmail.com,Cohort 5,true
+AI Ethics Forum 2026,seminar,2026-03-15,Manila,80,Nathan Aquino,nathan.aq@gmail.com,Cohort 3,true
