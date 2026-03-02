@@ -132,7 +132,8 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                 <p className="text-xs mt-1">Try adjusting your filters</p>
               </div>
             ) : (
-            <ResponsiveContainer width="100%" height={300}>
+            <>
+            <ResponsiveContainer width="100%" height={isMobile ? 200 : 300}>
               <PieChart>
                 <Pie
                   data={statusChartData}
@@ -140,7 +141,7 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                   cy="50%"
                   labelLine={!isMobile}
                   label={isMobile ? false : renderCustomLabel}
-                  outerRadius={isMobile ? 70 : 80}
+                  outerRadius={isMobile ? 60 : 80}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -149,9 +150,23 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend content={renderLegend(statusChartData)} />
+                {!isMobile && <Legend content={renderLegend(statusChartData)} />}
               </PieChart>
             </ResponsiveContainer>
+            {isMobile && (
+              <div className="mt-2 space-y-1.5 px-1">
+                {statusChartData.map((entry, idx) => (
+                  <div key={entry.name} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/40">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                      <span className="text-sm font-medium">{entry.name}</span>
+                    </div>
+                    <span className="text-sm font-bold">{entry.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            </>
             )}
           </TabsContent>
 
@@ -163,7 +178,8 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                 <p className="text-xs mt-1">Try adjusting your filters</p>
               </div>
             ) : (
-            <ResponsiveContainer width="100%" height={320}>
+            <>
+            <ResponsiveContainer width="100%" height={isMobile ? 200 : 320}>
               <PieChart>
                 <Pie
                   data={cohortChartData}
@@ -171,7 +187,7 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                   cy="50%"
                   labelLine={!isMobile}
                   label={isMobile ? false : renderCustomLabel}
-                  outerRadius={isMobile ? 70 : 80}
+                  outerRadius={isMobile ? 60 : 80}
                   fill="#8884d8"
                   dataKey="value"
                 >
@@ -180,9 +196,23 @@ export function DemographicsSection({ filters }: DemographicsSectionProps) {
                   ))}
                 </Pie>
                 <Tooltip />
-                <Legend content={renderLegend(cohortChartData)} />
+                {!isMobile && <Legend content={renderLegend(cohortChartData)} />}
               </PieChart>
             </ResponsiveContainer>
+            {isMobile && (
+              <div className="mt-2 space-y-1.5 px-1">
+                {cohortChartData.map((entry, idx) => (
+                  <div key={entry.name} className="flex items-center justify-between py-1.5 px-3 rounded-lg bg-muted/40">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                      <span className="text-sm font-medium">{entry.name}</span>
+                    </div>
+                    <span className="text-sm font-bold">{entry.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            </>
             )}
           </TabsContent>
         </Tabs>

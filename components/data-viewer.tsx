@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Input } from '@/components/ui/input'
 import { Database, RefreshCw, CalendarDays, Users, ClipboardList, Trash2, AlertTriangle, Search, X, MapPin, Clock, UserCheck, UserX, ChevronDown } from 'lucide-react'
 import { dashboardPost, saveDeletion } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface EventRow {
   id: number; name: string; type: string; date: string; location: string; capacity: number; registered: number; attended: number
@@ -31,6 +32,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: number; name: string } | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteMessage, setDeleteMessage] = useState<{ text: string; success: boolean } | null>(null)
+  const isMobile = useIsMobile()
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('')
@@ -95,16 +97,45 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
 
   const handleDelete = async () => {
     if (!deleteConfirm) return
+    const { type, id, name } = deleteConfirm
     setIsDeleting(true)
     try {
-      const data = await dashboardPost('delete', { type: deleteConfirm.type, id: deleteConfirm.id })
+      const data = await dashboardPost('delete', { type, id })
       if (data.message) {
         setDeleteMessage({ text: data.message, success: true })
         // Persist deletion to localStorage so it survives cold starts
         if (data.identifier) {
-          saveDeletion(deleteConfirm.type, data.identifier)
+          saveDeletion(type, data.identifier)
         }
-        fetchData()
+        // Optimistic update: immediately remove from local state
+        // This ensures the UI reflects the change even if the next fetch hits a different instance
+        if (type === 'event') {
+          const eventName = name
+          setEvents(prev => prev.filter(e => e.id !== id))
+          setRegistrations(prev => prev.filter(r => r.event !== eventName))
+          setCounts(prev => ({
+            events: Math.max(0, prev.events - 1),
+            attendees: prev.attendees,
+            registrations: Math.max(0, prev.registrations - registrations.filter(r => r.event === eventName).length)
+          }))
+        } else if (type === 'attendee') {
+          const attendeeName = name
+          setAttendees(prev => prev.filter(a => a.id !== id))
+          setRegistrations(prev => prev.filter(r => r.attendee !== attendeeName))
+          setCounts(prev => ({
+            events: prev.events,
+            attendees: Math.max(0, prev.attendees - 1),
+            registrations: Math.max(0, prev.registrations - registrations.filter(r => r.attendee === attendeeName).length)
+          }))
+        } else if (type === 'registration') {
+          setRegistrations(prev => prev.filter(r => r.id !== id))
+          setCounts(prev => ({
+            ...prev,
+            registrations: Math.max(0, prev.registrations - 1)
+          }))
+        }
+        // Background refetch for accurate server sync
+        setTimeout(() => fetchData(), 500)
         onDataChange?.()
       } else {
         setDeleteMessage({ text: data.error || 'Delete failed', success: false })
@@ -371,6 +402,39 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
           ) : (
             <>
               <TabsContent value="events">
+                {events.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No events yet</p>
+                ) : isMobile ? (
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    {events.map((e) => (
+                      <div key={e.id} className="p-3 rounded-lg border bg-card">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium leading-tight">{e.name}</p>
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                              <Badge className={`${getTypeColor(e.type)} text-xs`}>{e.type}</Badge>
+                              <span className="text-xs text-muted-foreground">{e.date}</span>
+                              <span className="text-xs text-muted-foreground">{e.location}</span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-600 flex-shrink-0"
+                            onClick={() => setDeleteConfirm({ type: 'event', id: e.id, name: e.name })}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                          <span>Cap: <strong className="text-foreground">{e.capacity}</strong></span>
+                          <span>Reg: <strong className="text-foreground">{e.registered}</strong></span>
+                          <span>Att: <strong className="text-foreground">{e.attended}</strong></span>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="flex gap-4 p-2 text-xs font-semibold border-t mt-2 pt-2">
+                      <span>Total Reg: {events.reduce((sum, e) => sum + e.registered, 0)}</span>
+                      <span>Total Att: {events.reduce((sum, e) => sum + e.attended, 0)}</span>
+                    </div>
+                  </div>
+                ) : (
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <Table className="min-w-[650px]">
                     <TableHeader>
@@ -387,12 +451,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {events.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No events yet</TableCell>
-                        </TableRow>
-                      ) : (
-                        events.map((e, index) => (
+                      {events.map((e, index) => (
                           <TableRow key={e.id}>
                             <TableCell className="text-xs text-muted-foreground">{index + 1}</TableCell>
                             <TableCell className="font-medium text-sm max-w-[200px] truncate">{e.name}</TableCell>
@@ -413,8 +472,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                               </Button>
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                     {events.length > 0 && (
                       <tfoot>
@@ -428,9 +486,41 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                     )}
                   </Table>
                 </div>
+                )}
               </TabsContent>
 
               <TabsContent value="attendees">
+                {attendees.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No attendees yet</p>
+                ) : isMobile ? (
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    {attendees.map((a) => (
+                      <div key={a.id} className="p-3 rounded-lg border bg-card">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium">{a.name}</p>
+                            <p className="text-xs text-muted-foreground truncate">{a.email}</p>
+                            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                              <Badge variant="secondary" className="text-xs">{a.cohort}</Badge>
+                              <Badge variant={a.status === 'active' ? 'default' : a.status === 'graduated' ? 'secondary' : 'outline'} className="text-xs">
+                                {a.status}
+                              </Badge>
+                              <span className="text-xs text-muted-foreground">{a.location}</span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-600 flex-shrink-0"
+                            onClick={() => setDeleteConfirm({ type: 'attendee', id: a.id, name: a.name })}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                        <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+                          <span>Registered: <strong className="text-foreground">{a.eventsRegistered}</strong></span>
+                          <span>Attended: <strong className="text-foreground">{a.eventsAttended}</strong></span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <Table className="min-w-[700px]">
                     <TableHeader>
@@ -447,12 +537,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {attendees.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={9} className="text-center text-muted-foreground py-8">No attendees yet</TableCell>
-                        </TableRow>
-                      ) : (
-                        attendees.map((a, index) => (
+                      {attendees.map((a, index) => (
                           <TableRow key={a.id}>
                             <TableCell className="text-xs text-muted-foreground">{index + 1}</TableCell>
                             <TableCell className="font-medium text-sm">{a.name}</TableCell>
@@ -477,14 +562,41 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                               </Button>
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
+                )}
               </TabsContent>
 
               <TabsContent value="registrations">
+                {registrations.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-8">No registrations yet</p>
+                ) : isMobile ? (
+                  <div className="space-y-2 max-h-[400px] overflow-y-auto">
+                    {registrations.map((r) => (
+                      <div key={r.id} className="p-3 rounded-lg border bg-card">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium leading-tight">{r.event}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">{r.attendee}</p>
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {r.attended
+                                ? <Badge className="bg-green-100 text-green-800 text-xs">Present</Badge>
+                                : <Badge className="bg-red-100 text-red-800 text-xs">No-show</Badge>
+                              }
+                              <span className="text-xs text-muted-foreground">{r.registeredAt}</span>
+                            </div>
+                          </div>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-red-600 flex-shrink-0"
+                            onClick={() => setDeleteConfirm({ type: 'registration', id: r.id, name: `${r.attendee} - ${r.event}` })}>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
                 <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
                   <Table className="min-w-[550px]">
                     <TableHeader>
@@ -499,12 +611,7 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {registrations.length === 0 ? (
-                        <TableRow>
-                          <TableCell colSpan={7} className="text-center text-muted-foreground py-8">No registrations yet</TableCell>
-                        </TableRow>
-                      ) : (
-                        registrations.map((r, index) => (
+                      {registrations.map((r, index) => (
                           <TableRow key={r.id}>
                             <TableCell className="text-xs text-muted-foreground">{index + 1}</TableCell>
                             <TableCell className="font-medium text-sm max-w-[180px] truncate">{r.event}</TableCell>
@@ -528,11 +635,11 @@ export function DataViewer({ refreshKey, onDataChange }: { refreshKey?: number; 
                               </Button>
                             </TableCell>
                           </TableRow>
-                        ))
-                      )}
+                      ))}
                     </TableBody>
                   </Table>
                 </div>
+                )}
                 {registrations.length > 0 && (
                   <p className="text-xs text-muted-foreground mt-2">Showing all {registrations.length} registrations</p>
                 )}

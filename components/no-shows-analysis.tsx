@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Skeleton } from '@/components/ui/skeleton'
 import { Badge } from '@/components/ui/badge'
 import { filtersToBody, dashboardPost, type FilterState } from '@/lib/utils'
+import { useIsMobile } from '@/hooks/use-mobile'
 
 interface NoShowData {
   eventName: string
@@ -23,6 +24,7 @@ interface NoShowsAnalysisProps {
 export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
   const [data, setData] = useState<NoShowData[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const isMobile = useIsMobile()
 
   const fetchNoShows = async () => {
     try {
@@ -83,29 +85,47 @@ export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
         <CardDescription className="text-xs sm:text-sm">Events with highest no-show rates</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="overflow-x-auto max-h-[350px] sm:max-h-[400px] overflow-y-auto">
-          <Table className="min-w-[400px]">
-            <TableHeader>
-              <TableRow>
-                <TableHead>Event</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">No-Shows</TableHead>
-                <TableHead className="text-right">Rate</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {data.length === 0 ? (
+        {data.length === 0 ? (
+          <div className="text-center text-muted-foreground py-8">
+            No no-show data available
+          </div>
+        ) : isMobile ? (
+          <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            {data.map((row, idx) => (
+              <div key={idx} className="p-3 rounded-lg border bg-card">
+                <div className="flex items-start justify-between mb-1.5">
+                  <p className="text-sm font-medium leading-tight flex-1 mr-2">{row.eventName}</p>
+                  <span className={`text-sm font-bold whitespace-nowrap ${getRateColor(row.noShowRate)}`}>
+                    {row.noShowRate.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge className={`${getTypeColor(row.eventType)} text-xs`}>{row.eventType}</Badge>
+                  <span className="text-xs text-muted-foreground">{row.date}</span>
+                  <span className="text-xs font-medium ml-auto">
+                    {row.noShowCount}/{row.totalRegistered} no-shows
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
-                    No no-show data available
-                  </TableCell>
+                  <TableHead>Event</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead>Date</TableHead>
+                  <TableHead className="text-right">No-Shows</TableHead>
+                  <TableHead className="text-right">Rate</TableHead>
                 </TableRow>
-              ) : (
-                data.map((row, idx) => (
+              </TableHeader>
+              <TableBody>
+                {data.map((row, idx) => (
                   <TableRow key={idx}>
-                    <TableCell className="font-medium text-xs sm:text-sm">
-                      {row.eventName.substring(0, 18)}
+                    <TableCell className="font-medium text-sm">
+                      {row.eventName}
                     </TableCell>
                     <TableCell>
                       <Badge className={getTypeColor(row.eventType)}>
@@ -123,11 +143,11 @@ export function NoShowsAnalysis({ filters }: NoShowsAnalysisProps) {
                       {row.noShowRate.toFixed(1)}%
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
       </CardContent>
     </Card>
   )
